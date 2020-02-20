@@ -24,7 +24,9 @@ class YukimiTwitter
 	puts(@timeline_tweet)
 	return @timeline_tweet
   end
-
+  def tweet(str)
+	@client.update(str)
+  end
 end
 	  
 		
@@ -108,8 +110,8 @@ def timeline_tweet
 	tweet = yukimi_twitter.get_tweet
     tweet_block = natto_parser.get_yukimi_speech(tweet)
 	markov_chain_text = natto_parser.markov_chain(tweet_block)
-	@client.update(natto_parser.change_yukimi(markov_chain_text))
-    sleep(2)
+	yukimi_twitter.tweet(natto_parser.change_yukimi(markov_chain_text))
+    sleep(900)
   end
 end
 

@@ -15,7 +15,7 @@ class YukimiTwitter
   def get_tweet
     @timeline_tweet = []
     @client.home_timeline({count: 100}).each do |tweet|
-      unless tweet.text.include?("RT") or tweet.text.include?("@") or tweet.text.include?("http") then
+      unless tweet.text.include?("RT") or tweet.text.include?("@") or tweet.text.include?("http") or tweet.user.screen_name.include?("YukimiLearning") then
         @timeline_tweet.push(tweet.text)
       end
     end
@@ -49,7 +49,7 @@ class NattoParser
   def parse_tweet(tweet)
     tweet_block = []
     tweet.each do |speech|
-      speech.gsub!(/[「」（）(){}｛｝｢｣]/,"")
+      speech = speech.gsub(/[「」（）(){}｛｝｢｣]/,"")
       tweet_block += parse(speech)
     end
     return tweet_block
@@ -88,7 +88,6 @@ class NattoParser
       end
       rand(1..4).times {analyzed_tweets.push("…")} if part_of_speech == "副詞" || part_of_speech == "助詞"
     end
-      rand(1..4).times {analyzed_tweets.push("…")} 
     if rand(9) == 0 then
       rand(1..4).times {analyzed_tweets.push("…")} 
       analyzed_tweets.push("ふふ")
@@ -103,11 +102,12 @@ def timeline_tweet
   yukimi_twitter = YukimiTwitter.new
   loop do
     tweet = yukimi_twitter.get_tweet
-  tweet_block = natto_parser.parse_tweet(tweet)
-  markov_chain_text = natto_parser.markov_chain(tweet_block)
-  yukimi_twitter.tweet(natto_parser.change_yukimi(markov_chain_text))
-  #puts (natto_parser.change_yukimi(markov_chain_text))
-  sleep(900)
+    p tweet
+    tweet_block = natto_parser.parse_tweet(tweet)
+    markov_chain_text = natto_parser.markov_chain(tweet_block)
+    yukimi_twitter.tweet(natto_parser.change_yukimi(markov_chain_text))
+    #puts (natto_parser.change_yukimi(markov_chain_text))
+    sleep(900)
   end
 end
 

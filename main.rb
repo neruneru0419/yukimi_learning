@@ -106,8 +106,8 @@ def timeline_tweet
     tweet = yukimi_twitter.get_tweet
     tweet_block = natto_parser.parse_tweet(tweet)
     markov_chain_text = natto_parser.markov_chain(tweet_block)
-    #yukimi_twitter.tweet(natto_parser.change_yukimi(markov_chain_text))
-    puts (natto_parser.change_yukimi(markov_chain_text))
+    yukimi_twitter.tweet(natto_parser.change_yukimi(markov_chain_text))
+    #puts (natto_parser.change_yukimi(markov_chain_text))
     sleep(900)
   end
 end

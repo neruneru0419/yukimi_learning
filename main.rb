@@ -49,7 +49,7 @@ class NattoParser
   def parse_tweet(tweet)
     tweet_block = []
     tweet.each do |speech|
-      speech = speech.gsub(/[「」（）(){}｛｝｢｣]/,"")
+      speech = speech.gsub(/[「」{}｛｝｢｣]/,"")
       tweet_block += parse(speech)
     end
     return tweet_block
@@ -62,10 +62,12 @@ class NattoParser
     while (markov_chain_text[-1] != "") do
       p markov_chain_text
       tweet_block.each do |tweet|
-        chain_block.push(tweet[2..-1]) if markov_chain_text[-2] == tweet[0]
+        chain_block.push(tweet) if markov_chain_text[-2] == tweet[0] && markov_chain_text[-1] == tweet[1]
       end
       break if chain_block.empty?
-      markov_chain_text += chain_block.sample
+      chain_block.sample[2..-1].each do |block|
+        markov_chain_text.push(block)
+      end
       chain_block = []
     end
     if 100 < markov_chain_text.join.size then
@@ -102,11 +104,10 @@ def timeline_tweet
   yukimi_twitter = YukimiTwitter.new
   loop do
     tweet = yukimi_twitter.get_tweet
-    p tweet
     tweet_block = natto_parser.parse_tweet(tweet)
     markov_chain_text = natto_parser.markov_chain(tweet_block)
-    yukimi_twitter.tweet(natto_parser.change_yukimi(markov_chain_text))
-    #puts (natto_parser.change_yukimi(markov_chain_text))
+    #yukimi_twitter.tweet(natto_parser.change_yukimi(markov_chain_text))
+    puts (natto_parser.change_yukimi(markov_chain_text))
     sleep(900)
   end
 end

@@ -21,8 +21,18 @@ class YukimiTwitter
     end
     return @timeline_tweet
   end
+  def reply
+    yukimi_tweet = []
+    @client.mentions_timeline.each do |tweet|
+      puts "\e[33m" + tweet.user.name + "\e[32m" + "[ID:" + tweet.user.screen_name + "]"
+      puts "\e[0m" + tweet.text
+      yukimi_tweet.push(tweet)
+      @yukimi_tweet_id.push(tweet.id)
+    end
+    return yukimi_tweet
+  end
   def tweet(str)
-    @client.update(str)
+    puts(str)
   end
 end
     
@@ -99,7 +109,7 @@ class NattoParser
   end
 end
 
-def timeline_tweet 
+timeline_tweet = Thread.new do 
   natto_parser = NattoParser.new
   yukimi_twitter = YukimiTwitter.new
   loop do
@@ -112,7 +122,27 @@ def timeline_tweet
   end
 end
 
+reply_tweet = Thread.new do
+  yukimi_twitter = YukimiTwitter.new
+  natto_parser = NattoParser.new
+  yukimi_tweet_id = []
+  loop do
+    yukimi_tweet_id += yukimi_twitter.reply
+    yukimi_tweet_id.each do |tweet|
+      unless yukimi_tweet_id.include?(tweet.id) then
+        tw = yukimi_twitter.get_tweet
+        tweet_block = natto_parser.parse_tweet(tw)
+        markov_chain_text = natto_parser.markov_chain(tweet_block)
+        puts("@#{tweet.user.screen_name} #{(natto_parser.markov_chain(markov_chain_text))}",  options = {:in_reply_to_status_id => tweet.id})
+        yukimi_tweet_id.push(tweet.id)
+      end
+    end
+    sleep(60)
+  end
+end
+
 if __FILE__ == $0
-  timeline_tweet
+  timeline_tweet.join
+  reply_tweet.join
 end
 

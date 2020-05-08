@@ -137,7 +137,6 @@ end
 
 
 reply_tweet = Thread.new do
-  sleep(720)
   natto_parser = NattoParser.new
   yukimi_tweet_id = []
   $yukimi_twitter.get_reply.each do |tweet|

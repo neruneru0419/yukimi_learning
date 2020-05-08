@@ -9,43 +9,20 @@ class YukimiTwitter
       config.access_token    = ENV['MY_ACCESS_TOKEN']
       config.access_token_secret = ENV['MY_ACCESS_TOKEN_SECRET']
     end
+    @yukimi_tweet_id = @client.mentions_timeline.map{|tweet| tweet.id}
+  end
+
+  def get_tweet
     @timeline_tweet = []
     @client.home_timeline({count: 100}).each do |tweet|
       unless tweet.text.include?("RT") or tweet.text.include?("@") or tweet.text.include?("http") or tweet.user.screen_name.include?("YukimiLearning") then
         @timeline_tweet.push(tweet.text)
       end
     end
-  end
-
-  def get_tweet
     return @timeline_tweet
-  end
-
-  def update_tweet
-    tweets = []
-    @client.home_timeline({count: 100}).each do |tweet|
-      unless tweet.text.include?("RT") or tweet.text.include?("@") or tweet.text.include?("http") or tweet.user.screen_name.include?("YukimiLearning") then
-        tweets.push(tweet.text)
-      end
-      @timeline_tweet = tweets
-    end
-
-  end
-  def get_reply
-    yukimi_tweet = []
-    @client.mentions_timeline.each do |tweet|
-      puts "\e[33m" + tweet.user.name + "\e[32m" + "[ID:" + tweet.user.screen_name + "]"
-      puts "\e[0m" + tweet.text
-      yukimi_tweet.push(tweet)
-    end
-    return yukimi_tweet
   end
   def tweet(str)
     @client.update(str)
-  end
-
-  def reply(str, option)
-    @client.update(str,  options = option)
   end
 end
     
@@ -83,6 +60,7 @@ class NattoParser
     markov_chain_text = start_block.sample
     chain_block = []
     while (markov_chain_text[-1] != "") do
+      p markov_chain_text
       tweet_block.each do |tweet|
         chain_block.push(tweet) if markov_chain_text[-2] == tweet[0] && markov_chain_text[-1] == tweet[1]
       end
@@ -121,53 +99,19 @@ class NattoParser
   end
 end
 
-$yukimi_twitter = YukimiTwitter.new
-
-timeline_tweet = Thread.new do 
+def timeline_tweet 
   natto_parser = NattoParser.new
+  yukimi_twitter = YukimiTwitter.new
   loop do
-    tweet = $yukimi_twitter.get_tweet
+    tweet = yukimi_twitter.get_tweet
     tweet_block = natto_parser.parse_tweet(tweet)
     markov_chain_text = natto_parser.markov_chain(tweet_block)
-    yukimi_tweet = natto_parser.change_yukimi(markov_chain_text)
-    #$yukimi_twitter.tweet(yukimi_tweet)
+    yukimi_twitter.tweet(natto_parser.change_yukimi(markov_chain_text))
+    puts("tweeted")
     sleep(900)
-  end
-end
-
-
-reply_tweet = Thread.new do
-  natto_parser = NattoParser.new
-  yukimi_tweet_id = []
-  $yukimi_twitter.get_reply.each do |tweet|
-    yukimi_tweet_id.push(tweet.id)
-  end
-  loop do
-    yukimi_reply = $yukimi_twitter.get_reply
-    yukimi_reply.each do |tweet|
-      unless yukimi_tweet_id.include?(tweet.id) then
-        tw = $yukimi_twitter.get_tweet
-        tweet_block = natto_parser.parse_tweet(tw)
-        markov_chain_text = natto_parser.markov_chain(tweet_block)
-        $yukimi_twitter.reply(markov_chain_text, {:in_reply_to_status_id => tweet.id})
-        puts("replied")
-        yukimi_tweet_id.push(tweet.id)
-      end
-    end
-    sleep(60)
-  end
-end
-
-update = Thread.new do
-  loop do
-    sleep(900)
-    $yukimi_twitter.update_tweet
   end
 end
 
 if __FILE__ == $0
-  timeline_tweet.join
-  reply_tweet.join
-  update.join
+  timeline_tweet
 end
-

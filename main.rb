@@ -131,6 +131,7 @@ $yukimi_twitter = YukimiTwitter.new
 
 timeline_tweet = Thread.new do 
   natto_parser = NattoParser.new
+  sleep(120)
   loop do
     tweet = $yukimi_twitter.get_tweet
     tweet_block = natto_parser.parse_tweet(tweet)
@@ -156,7 +157,7 @@ reply_tweet = Thread.new do
         yukimi_tweet_id.push(tweet.id)
       end
     end
-    sleep(5)
+    sleep(60)
   end
 end
 

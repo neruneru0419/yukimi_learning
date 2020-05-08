@@ -150,7 +150,8 @@ reply_tweet = Thread.new do
         tw = $yukimi_twitter.get_tweet
         tweet_block = natto_parser.parse_tweet(tw)
         markov_chain_text = natto_parser.markov_chain(tweet_block)
-        $yukimi_twitter.reply("@#{tweet.user.screen_name} #{markov_chain_text}", {:in_reply_to_status_id => tweet.id})
+        yukimi_tweet = natto_parser.change_yukimi(markov_chain_text)
+        $yukimi_twitter.reply("@#{tweet.user.screen_name} #{yukimi_tweet}", {:in_reply_to_status_id => tweet.id})
         puts("replied")
         yukimi_tweet_id.push(tweet.id)
       end

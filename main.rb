@@ -130,13 +130,14 @@ timeline_tweet = Thread.new do
     tweet_block = natto_parser.parse_tweet(tweet)
     markov_chain_text = natto_parser.markov_chain(tweet_block)
     yukimi_tweet = natto_parser.change_yukimi(markov_chain_text)
-    $yukimi_twitter.tweet(yukimi_tweet)
+    #$yukimi_twitter.tweet(yukimi_tweet)
     sleep(900)
   end
 end
 
 
 reply_tweet = Thread.new do
+  sleep(720)
   natto_parser = NattoParser.new
   yukimi_tweet_id = []
   $yukimi_twitter.get_reply.each do |tweet|
@@ -150,6 +151,7 @@ reply_tweet = Thread.new do
         tweet_block = natto_parser.parse_tweet(tw)
         markov_chain_text = natto_parser.markov_chain(tweet_block)
         $yukimi_twitter.reply(markov_chain_text, {:in_reply_to_status_id => tweet.id})
+        puts("replied")
         yukimi_tweet_id.push(tweet.id)
       end
     end

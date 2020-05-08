@@ -131,7 +131,7 @@ timeline_tweet = Thread.new do
     markov_chain_text = natto_parser.markov_chain(tweet_block)
     yukimi_tweet = natto_parser.change_yukimi(markov_chain_text)
     puts("tweet", yukimi_tweet)
-    #$yukimi_twitter.tweet(yukimi_tweet)
+    $yukimi_twitter.tweet(yukimi_tweet)
     sleep(900)
   end
 end

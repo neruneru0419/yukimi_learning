@@ -43,7 +43,7 @@ class YukimiTwitter
   def tweet(str)
     @client.update(str)
   end
-
+  
   def reply(str, option)
     @client.update(str,  options = option)
   end
@@ -117,7 +117,16 @@ class NattoParser
       analyzed_tweets.push("ふふ")
       rand(1..4).times {analyzed_tweets.push("…")} 
     end
-    return analyzed_tweets.join
+    yukimi_tweet = analyzed_tweets.join
+    new_str = ""
+    yukimi_tweet.each_char do |s|
+      if s == "#" then
+        new_str += "\n" 
+        new_str.delete!("…")
+      end
+      new_str += s
+    end
+    return new_str
   end
 end
 

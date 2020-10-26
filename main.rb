@@ -126,6 +126,15 @@ class NattoParser
       end
       new_str += s
     end
+    
+    #不適切なワードを排除
+    ngword = Array.new
+    ngword = File.open("ngword.txt", "r").readlines
+    ngword.each {|i| i.chomp!}
+    ngword.each do |i|
+        new_str.gsub!(i, "×")
+    end
+
     return new_str
   end
 end

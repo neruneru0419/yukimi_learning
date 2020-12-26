@@ -148,6 +148,7 @@ class Ngword
 
   def get_ngword
     uri = URI.parse(ENV['DATABASE_URL'])
+    puts(uri.hostname, uri.port, uri.path[1..-1], uri.user, uri.password)
     connect = PG.connect(uri.hostname, uri.port, nil, nil, uri.path[1..-1], uri.user, uri.password)
     results = connect.exec('select ngword from ngwords')
 

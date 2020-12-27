@@ -98,6 +98,7 @@ class NattoParser
     tweet_sentence = markov_chain_text.join
     ngword = Ngword.new
     ngword_list = ngword.get_ngword
+    p ngword_list
     ngword_list.each do |ng|
       ngflg = true if tweet_sentence.include?(ng)
     end

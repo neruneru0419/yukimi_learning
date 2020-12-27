@@ -40,6 +40,6 @@ end
 #main
 ng = Ngword.new
 ng.connect_postgresql
-ng.insert_ngword
+#ng.insert_ngword
 ng.show_ngword
 ng.close_postgresql

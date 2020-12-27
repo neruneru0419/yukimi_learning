@@ -15,7 +15,7 @@ class Ngword
   def close_postgresql
     @connect.finish
   end
-
+=begin
   def insert_ngword
     File.open("setting.txt", "r") do |ngword|
       ngword.each_line do |n|
@@ -23,6 +23,7 @@ class Ngword
       end
     end
   end
+=end
   def show_ngword
     results = @connect.exec('select ngword from ngwords')
     results.each do |result|

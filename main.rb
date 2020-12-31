@@ -41,13 +41,13 @@ class YukimiTwitter
   end
 
   def tweet(str)
-    puts(str)
-    # @client.update(str)
+    #puts(str)
+    @client.update(str)
   end
 
   def reply(str, option)
-    puts(str)
-    # @client.update(str,  options = option)
+    #puts(str, option)
+    @client.update(str,  options = option)
   end
 end
 
@@ -55,6 +55,7 @@ class NattoParser
   def initialize
     @nm = Natto::MeCab.new
     @ngword = Ngword.new
+    @ngword_list = @ngword.get_ngword
   end
 
   def parse(timeline_tweet)
@@ -98,8 +99,7 @@ class NattoParser
     end
 
     tweet_sentence = markov_chain_text.join
-    ngword_list = @ngword.get_ngword
-    ngword_list.each do |ng|
+    @ngword_list.each do |ng|
       ngflg = true if tweet_sentence.include?(ng)
     end
     puts tweet_sentence

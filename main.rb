@@ -54,6 +54,7 @@ end
 class NattoParser
   def initialize
     @nm = Natto::MeCab.new
+    @ngword = Ngword.new
   end
 
   def parse(timeline_tweet)
@@ -79,6 +80,7 @@ class NattoParser
   end
 
   def markov_chain(tweet_block)
+    
     start_block = tweet_block.select { |block| block[0] == '' }
     markov_chain_text = start_block.sample
     chain_block = []
@@ -96,9 +98,7 @@ class NattoParser
     end
 
     tweet_sentence = markov_chain_text.join
-    ngword = Ngword.new
-    ngword_list = ngword.get_ngword
-    p ngword_list
+    ngword_list = @ngword.get_ngword
     ngword_list.each do |ng|
       ngflg = true if tweet_sentence.include?(ng)
     end
@@ -145,11 +145,7 @@ end
 class Ngword
   def initialize
     @ngwords = []
-  end
-
-  def get_ngword
     uri = URI.parse(ENV['DATABASE_URL'])
-    puts(uri.hostname, uri.port, uri.path[1..-1], uri.user, uri.password)
     connect = PG.connect(uri.hostname, uri.port, nil, nil, uri.path[1..-1], uri.user, uri.password)
     results = connect.exec('select ngword from ngwords')
 
@@ -157,7 +153,9 @@ class Ngword
       @ngwords.push(result['ngword'])
     end
     connect.finish
+  end
 
+  def get_ngword
     return @ngwords
   end
 end

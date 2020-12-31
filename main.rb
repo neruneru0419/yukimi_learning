@@ -151,6 +151,11 @@ class Ngword
 
     results.each do |result|
       @ngwords.push(result['ngword'])
+      if result['ngword'].match?(/\p{hiragana}/) then
+        @ngwords.push(result['ngword'].tr('ぁ-ん', 'ァ-ン'))
+      elsif result['ngword'].match?(/\p{katakana}/) then
+        @ngwords.push(result['ngword'].tr('ァ-ン', 'ぁ-ん'))
+      end
     end
     connect.finish
   end

@@ -11,6 +11,7 @@ class YukimiTwitter
       config.access_token_secret = ENV['MY_ACCESS_TOKEN_SECRET']
     end
     @timeline_tweet = []
+
     @client.home_timeline({ count: 100 }).each do |tweet|
       unless tweet.text.include?('RT') || tweet.text.include?('@') || tweet.text.include?('http') || tweet.user.screen_name.include?('YukimiLearning')
         @timeline_tweet.push(tweet.text)
@@ -48,6 +49,23 @@ class YukimiTwitter
   def reply(str, option)
     #puts(str, option)
     @client.update(str,  options = option)
+  end
+
+
+  def get_follower_id
+    return @client.follower_ids.map{|follower| follower}
+  end
+
+  def get_followee_id
+    return @client.friend_ids.map{|followee| followee}
+  end
+
+  def get_users(user_id)
+    return @client.users(user_id)
+  end
+
+  def remove(user_id)
+    @client.unfollow(user_id)
   end
 end
 
@@ -164,7 +182,6 @@ class Ngword
     return @ngwords
   end
 end
-
 $yukimi_twitter = YukimiTwitter.new
 
 timeline_tweet = Thread.new do
@@ -210,8 +227,23 @@ update = Thread.new do
   end
 end
 
+remove = Thread.new do
+  loop do
+    follower_ids = $yukimi_twitter.get_follower_id
+    followee_ids = $yukimi_twitter.get_followee_id
+
+    users_id = followee_ids - follower_ids
+    for user_id in users_ids do 
+      $yukimi_twitter.remove(user_id)
+    end
+    sleep(900)
+  end
+end
+
 if __FILE__ == $0
   timeline_tweet.join
   reply_tweet.join
   update.join
+  remove.join
 end
+

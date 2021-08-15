@@ -1,5 +1,4 @@
 require 'twitter'
-require 'natto'
 require 'pg'
 
 class YukimiTwitter
@@ -71,7 +70,6 @@ end
 
 class NattoParser
   def initialize
-    @nm = Natto::MeCab.new
     @ngword = Ngword.new
     @ngword_list = @ngword.get_ngword
   end
@@ -182,6 +180,7 @@ class Ngword
     return @ngwords
   end
 end
+
 $yukimi_twitter = YukimiTwitter.new
 
 timeline_tweet = Thread.new do

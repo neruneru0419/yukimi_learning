@@ -16,7 +16,7 @@ class YukimiTwitter
     @client.home_timeline({ count: 100 }).each do |tweet|
       unless tweet.text.include?('RT') || tweet.text.include?('@') \
               || tweet.text.include?('http') || tweet.user.screen_name.include?('YukimiLearning') \
-              || @ngword.ngword?(tweet.text)
+              || @ngword.ngword?(tweet.text) || (tweet.text.size > 100)
         @timeline_tweet_data.push({"tweet_text": tweet.text, "tweet_id": tweet.id})
       end
     end
@@ -41,7 +41,7 @@ class YukimiTwitter
     @client.home_timeline({ count: 100 }).each do |tweet|
       unless tweet.text.include?('RT') || tweet.text.include?('@') \
         || tweet.text.include?('http') || tweet.user.screen_name.include?('YukimiLearning') \
-        || @ngword.ngword?(tweet.text)
+        || @ngword.ngword?(tweet.text) || (tweet.text.size > 100)
       end
     end
     @timeline_tweet_data = tweet_data
@@ -117,8 +117,11 @@ class Parser
       end
       new_str += s
     end
-
-    return new_str
+    if 150 < new_str.size then
+      change_yukimi(markov_chain_text)
+    else
+      return new_str
+    end
   end
 end
 
@@ -156,6 +159,7 @@ timeline_tweet = Thread.new do
     tweet_id = tweet_data[:tweet_id]
     yukimi_tweet = parser.change_yukimi(tweet_text)
     puts('tweet', yukimi_tweet)
+    puts yukimi_tweet.size
     $yukimi_twitter.tweet(yukimi_tweet)
     $yukimi_twitter.favorite(tweet_id)
     sleep(900)

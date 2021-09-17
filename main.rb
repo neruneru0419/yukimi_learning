@@ -12,11 +12,11 @@ class YukimiTwitter
       config.access_token_secret = ENV['MY_ACCESS_TOKEN_SECRET']
     end
     @timeline_tweet_data = []
-    ngword = Ngword.new
+    @ngword = Ngword.new
     @client.home_timeline({ count: 100 }).each do |tweet|
       unless tweet.text.include?('RT') || tweet.text.include?('@') \
               || tweet.text.include?('http') || tweet.user.screen_name.include?('YukimiLearning') \
-              || ngword.ngword?(tweet.text)
+              || @ngword.ngword?(tweet.text)
         @timeline_tweet_data.push({"tweet_text": tweet.text, "tweet_id": tweet.id})
       end
     end
@@ -41,7 +41,7 @@ class YukimiTwitter
     @client.home_timeline({ count: 100 }).each do |tweet|
       unless tweet.text.include?('RT') || tweet.text.include?('@') \
         || tweet.text.include?('http') || tweet.user.screen_name.include?('YukimiLearning') \
-        || parser.ngword?(tweet.text)
+        || @ngword.ngword?(tweet.text)
       end
     end
     @timeline_tweet_data = tweet_data
@@ -210,4 +210,3 @@ if __FILE__ == $0
   update.join
   remove.join
 end
-

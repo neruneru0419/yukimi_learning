@@ -20,7 +20,6 @@ class YukimiTwitter
         @timeline_tweet_data.push({"tweet_text": tweet.text, "tweet_id": tweet.id})
       end
     end
-
   end
 
   def get_tweet_data

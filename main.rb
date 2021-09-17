@@ -1,5 +1,7 @@
 require 'twitter'
+require 'natto'
 require 'pg'
+
 
 class YukimiTwitter
   def initialize
@@ -9,27 +11,41 @@ class YukimiTwitter
       config.access_token    = ENV['MY_ACCESS_TOKEN']
       config.access_token_secret = ENV['MY_ACCESS_TOKEN_SECRET']
     end
-    @timeline_tweet = []
-
+    @timeline_tweet_data = []
+    ngword = Ngword.new
     @client.home_timeline({ count: 100 }).each do |tweet|
-      unless tweet.text.include?('RT') || tweet.text.include?('@') || tweet.text.include?('http') || tweet.user.screen_name.include?('YukimiLearning')
-        @timeline_tweet.push(tweet.text)
+      unless tweet.text.include?('RT') || tweet.text.include?('@') \
+              || tweet.text.include?('http') || tweet.user.screen_name.include?('YukimiLearning') \
+              || ngword.ngword?(tweet.text)
+        @timeline_tweet_data.push({"tweet_text": tweet.text, "tweet_id": tweet.id})
       end
     end
+
   end
 
-  def get_tweet
-    return @timeline_tweet
+  def get_tweet_data
+    return @timeline_tweet_data
+  end
+
+  def get_tweet_texts
+    #@timeline_tweet_dataのkeyがtweet_textな物を配列として返す
+    return @timeline_tweet_data.map {|ttd| ttd[:tweet_text]}
+  end
+
+  def get_tweet_ids
+    #@timeline_tweet_dataのkeyがtweet_ idな物を配列として返す
+    return @timeline_tweet_data.map {|ttd| ttd[:tweet_id]}
   end
 
   def update_tweet
-    tweets = []
+    tweet_data = []
     @client.home_timeline({ count: 100 }).each do |tweet|
-      unless tweet.text.include?('RT') || tweet.text.include?('@') || tweet.text.include?('http') || tweet.user.screen_name.include?('YukimiLearning')
-        tweets.push(tweet.text)
+      unless tweet.text.include?('RT') || tweet.text.include?('@') \
+        || tweet.text.include?('http') || tweet.user.screen_name.include?('YukimiLearning') \
+        || parser.ngword?(tweet.text)
       end
-      @timeline_tweet = tweets
     end
+    @timeline_tweet_data = tweet_data
   end
 
   def get_reply
@@ -66,67 +82,18 @@ class YukimiTwitter
   def remove(user_id)
     @client.unfollow(user_id)
   end
+  def favorite(user_id)
+    @client.favorite(user_id)
+  end
 end
 
-class NattoParser
+class Parser
   def initialize
-    @ngword = Ngword.new
-    @ngword_list = @ngword.get_ngword
-  end
-
-  def parse(timeline_tweet)
-    @analyzed_tweets = ['']
-    @tweet_blocks = []
-    @nm.parse(timeline_tweet) do |n|
-      @analyzed_tweets.push(n.surface)
-    end
-    (@analyzed_tweets.size - 3).times do |split_tweet|
-      tweet_block = @analyzed_tweets[split_tweet..(split_tweet + 3)]
-      @tweet_blocks.push(tweet_block)
-    end
-    return @tweet_blocks
-  end
-
-  def parse_tweet(tweet)
-    tweet_block = []
-    tweet.each do |speech|
-      speech = speech.gsub(/[「」{}｛｝｢｣]/, '')
-      tweet_block += parse(speech)
-    end
-    return tweet_block
-  end
-
-  def markov_chain(tweet_block)
-    
-    start_block = tweet_block.select { |block| block[0] == '' }
-    markov_chain_text = start_block.sample
-    chain_block = []
-    ngflg = false
-    while markov_chain_text[-1] != ''
-      tweet_block.each do |tweet|
-        chain_block.push(tweet) if markov_chain_text[-2] == tweet[0] && markov_chain_text[-1] == tweet[1]
-      end
-      break if chain_block.empty?
-
-      chain_block.sample[2..-1].each do |block|
-        markov_chain_text.push(block)
-      end
-      chain_block = []
-    end
-
-    tweet_sentence = markov_chain_text.join
-    @ngword_list.each do |ng|
-      ngflg = true if tweet_sentence.include?(ng)
-    end
-    puts tweet_sentence
-    if (100 < tweet_sentence.size) || ngflg
-      markov_chain(tweet_block)
-    else
-      return tweet_sentence
-    end
+    @nm = Natto::MeCab.new
   end
 
   def change_yukimi(markov_chain_text)
+    p markov_chain_text
     nm = Natto::MeCab.new
     analyzed_tweets = []
     rand(1..4).times { analyzed_tweets.push('…') } if rand(4) == 0
@@ -176,28 +143,30 @@ class Ngword
     connect.finish
   end
 
-  def get_ngword
-    return @ngwords
+  def ngword?(tweet_text)
+
+    return @ngwords.include?(tweet_text)
   end
 end
-
 $yukimi_twitter = YukimiTwitter.new
 
 timeline_tweet = Thread.new do
-  natto_parser = NattoParser.new
+  parser = Parser.new
   loop do
-    tweet = $yukimi_twitter.get_tweet
-    tweet_block = natto_parser.parse_tweet(tweet)
-    markov_chain_text = natto_parser.markov_chain(tweet_block)
-    yukimi_tweet = natto_parser.change_yukimi(markov_chain_text)
+    tweet_data = $yukimi_twitter.get_tweet_data.sample
+    p tweet_data
+    tweet_text = tweet_data[:tweet_text]
+    tweet_id = tweet_data[:tweet_id]
+    yukimi_tweet = parser.change_yukimi(tweet_text)
     puts('tweet', yukimi_tweet)
     $yukimi_twitter.tweet(yukimi_tweet)
+    $yukimi_twitter.favorite(tweet_id)
     sleep(900)
   end
 end
 
 reply_tweet = Thread.new do
-  natto_parser = NattoParser.new
+  parser = Parser.new
   yukimi_tweet_id = []
   $yukimi_twitter.get_reply.each do |tweet|
     yukimi_tweet_id.push(tweet.id)
@@ -207,12 +176,11 @@ reply_tweet = Thread.new do
     yukimi_reply.each do |tweet|
       next if yukimi_tweet_id.include?(tweet.id)
 
-      tw = $yukimi_twitter.get_tweet
-      tweet_block = natto_parser.parse_tweet(tw)
-      markov_chain_text = natto_parser.markov_chain(tweet_block)
-      yukimi_tweet = natto_parser.change_yukimi(markov_chain_text)
+      tweet_text = $yukimi_twitter.get_tweet_texts.sample
+      yukimi_tweet = parser.change_yukimi(tweet_text)
       $yukimi_twitter.reply("@#{tweet.user.screen_name} #{yukimi_tweet}", { in_reply_to_status_id: tweet.id })
       puts('replied')
+      $yukimi_twitter.favorite(tweet.id)
       yukimi_tweet_id.push(tweet.id)
     end
     sleep(60)
@@ -231,7 +199,7 @@ remove = Thread.new do
     follower_ids = $yukimi_twitter.get_follower_id
     followee_ids = $yukimi_twitter.get_followee_id
 
-    users_id = followee_ids - follower_ids
+    users_ids = followee_ids - follower_ids
     for user_id in users_ids do 
       $yukimi_twitter.remove(user_id)
     end

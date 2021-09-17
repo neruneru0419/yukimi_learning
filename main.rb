@@ -42,6 +42,7 @@ class YukimiTwitter
       unless tweet.text.include?('RT') || tweet.text.include?('@') \
         || tweet.text.include?('http') || tweet.user.screen_name.include?('YukimiLearning') \
         || @ngword.ngword?(tweet.text) || (tweet.text.size > 100)
+        tweet_data.push({"tweet_text": tweet.text, "tweet_id": tweet.id})
       end
     end
     @timeline_tweet_data = tweet_data

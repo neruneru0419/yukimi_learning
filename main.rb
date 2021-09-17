@@ -56,12 +56,10 @@ class YukimiTwitter
   end
 
   def tweet(str)
-    #puts(str)
     @client.update(str)
   end
 
   def reply(str, option)
-    #puts(str, option)
     @client.update(str,  options = option)
   end
 

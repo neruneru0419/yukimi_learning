@@ -145,8 +145,7 @@ class Ngword
   end
 
   def ngword?(tweet_text)
-
-    return @ngwords.include?(tweet_text)
+    @ngwords.any?{|nw| tweet_text.include?(nw)}
   end
 end
 $yukimi_twitter = YukimiTwitter.new

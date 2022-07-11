@@ -1,6 +1,6 @@
 require 'twitter'
 require 'natto'
-require 'pg'
+#require 'pg'
 
 
 class YukimiTwitter
@@ -12,11 +12,11 @@ class YukimiTwitter
       config.access_token_secret = ENV['MY_ACCESS_TOKEN_SECRET']
     end
     @timeline_tweet_data = []
-    @ngword = Ngword.new
+    #@ngword = Ngword.new
     @client.home_timeline({ count: 100 }).each do |tweet|
       unless tweet.text.include?('RT') || tweet.text.include?('@') \
               || tweet.text.include?('http') || tweet.user.screen_name.include?('YukimiLearning') \
-              || @ngword.ngword?(tweet.text) || (tweet.text.size > 100)
+              || (tweet.text.size > 100)
         @timeline_tweet_data.push({"tweet_text": tweet.text, "tweet_id": tweet.id})
       end
     end
@@ -41,7 +41,7 @@ class YukimiTwitter
     @client.home_timeline({ count: 100 }).each do |tweet|
       unless tweet.text.include?('RT') || tweet.text.include?('@') \
         || tweet.text.include?('http') || tweet.user.screen_name.include?('YukimiLearning') \
-        || @ngword.ngword?(tweet.text) || (tweet.text.size > 100)
+        || (tweet.text) || (tweet.text.size > 100)
         tweet_data.push({"tweet_text": tweet.text, "tweet_id": tweet.id})
       end
     end
@@ -126,6 +126,7 @@ class Parser
   end
 end
 
+=begin
 class Ngword
   def initialize
     @ngwords = []
@@ -148,6 +149,9 @@ class Ngword
     @ngwords.any?{|nw| tweet_text.include?(nw)}
   end
 end
+
+=end
+
 $yukimi_twitter = YukimiTwitter.new
 
 timeline_tweet = Thread.new do

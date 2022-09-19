@@ -28,7 +28,6 @@ GEM
     natto (1.2.0)
       ffi (>= 1.9.0)
     naught (1.1.0)
-    pg (1.2.3)
     public_suffix (4.0.6)
     rake (13.0.1)
     simple_oauth (0.3.1)
@@ -53,8 +52,10 @@ PLATFORMS
 
 DEPENDENCIES
   natto
-  pg
   twitter
+
+RUBY VERSION
+   ruby 2.6.8p205
 
 BUNDLED WITH
    2.1.4

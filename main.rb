@@ -1,5 +1,5 @@
-#require 'twitter'
-#require 'natto'
+require 'twitter'
+require 'natto'
 
 class YukimiTwitter
   def initialize
@@ -14,7 +14,7 @@ class YukimiTwitter
     @client.home_timeline({ count: 100 }).each do |tweet|
       unless tweet.text.include?('RT') || tweet.text.include?('@') \
               || tweet.text.include?('http') || tweet.user.screen_name.include?('YukimiLearning') \
-              || @ngword.ngword?(tweet.text) (tweet.text.size > 100)
+              || @ngword.ngword?(tweet.text) || (tweet.text.size > 100)
         @timeline_tweet_data.push({"tweet_text": tweet.text, "tweet_id": tweet.id})
       end
     end
@@ -62,7 +62,6 @@ class YukimiTwitter
     @client.update(str,  options = option)
   end
 
-
   def get_follower_id
     @client.follower_ids.map{|follower| follower}
   end
@@ -78,11 +77,11 @@ class YukimiTwitter
   def remove(user_id)
     @client.unfollow(user_id)
   end
+
   def favorite(user_id)
     @client.favorite(user_id)
   end
 end
-
 class Parser
   def initialize
     @nm = Natto::MeCab.new

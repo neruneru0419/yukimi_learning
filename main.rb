@@ -1,7 +1,5 @@
 require 'twitter'
 require 'natto'
-#require 'pg'
-
 
 class YukimiTwitter
   def initialize
@@ -12,28 +10,28 @@ class YukimiTwitter
       config.access_token_secret = ENV['MY_ACCESS_TOKEN_SECRET']
     end
     @timeline_tweet_data = []
-    #@ngword = Ngword.new
+    @ngword = Ngword.new
     @client.home_timeline({ count: 100 }).each do |tweet|
       unless tweet.text.include?('RT') || tweet.text.include?('@') \
               || tweet.text.include?('http') || tweet.user.screen_name.include?('YukimiLearning') \
-              || (tweet.text.size > 100)
+              || @ngword.ngword?(tweet.text) || (tweet.text.size > 100)
         @timeline_tweet_data.push({"tweet_text": tweet.text, "tweet_id": tweet.id})
       end
     end
   end
 
   def get_tweet_data
-    return @timeline_tweet_data
+    @timeline_tweet_data
   end
 
   def get_tweet_texts
     #@timeline_tweet_dataのkeyがtweet_textな物を配列として返す
-    return @timeline_tweet_data.map {|ttd| ttd[:tweet_text]}
+    @timeline_tweet_data.map {|ttd| ttd[:tweet_text]}
   end
 
   def get_tweet_ids
     #@timeline_tweet_dataのkeyがtweet_ idな物を配列として返す
-    return @timeline_tweet_data.map {|ttd| ttd[:tweet_id]}
+    @timeline_tweet_data.map {|ttd| ttd[:tweet_id]}
   end
 
   def update_tweet
@@ -41,7 +39,7 @@ class YukimiTwitter
     @client.home_timeline({ count: 100 }).each do |tweet|
       unless tweet.text.include?('RT') || tweet.text.include?('@') \
         || tweet.text.include?('http') || tweet.user.screen_name.include?('YukimiLearning') \
-        || (tweet.text) || (tweet.text.size > 100)
+        || @ngword.ngword?(tweet.text) || (tweet.text) || (tweet.text.size > 100)
         tweet_data.push({"tweet_text": tweet.text, "tweet_id": tweet.id})
       end
     end
@@ -53,7 +51,7 @@ class YukimiTwitter
     @client.mentions_timeline.each do |tweet|
       yukimi_tweet.push(tweet)
     end
-    return yukimi_tweet
+    yukimi_tweet
   end
 
   def tweet(str)
@@ -64,27 +62,26 @@ class YukimiTwitter
     @client.update(str,  options = option)
   end
 
-
   def get_follower_id
-    return @client.follower_ids.map{|follower| follower}
+    @client.follower_ids.map{|follower| follower}
   end
 
   def get_followee_id
-    return @client.friend_ids.map{|followee| followee}
+    @client.friend_ids.map{|followee| followee}
   end
 
   def get_users(user_id)
-    return @client.users(user_id)
+    @client.users(user_id)
   end
 
   def remove(user_id)
     @client.unfollow(user_id)
   end
+
   def favorite(user_id)
     @client.favorite(user_id)
   end
 end
-
 class Parser
   def initialize
     @nm = Natto::MeCab.new
@@ -121,36 +118,24 @@ class Parser
     if 150 < new_str.size then
       change_yukimi(markov_chain_text)
     else
-      return new_str
+      new_str
     end
   end
 end
 
-=begin
 class Ngword
   def initialize
     @ngwords = []
-    uri = URI.parse(ENV['DATABASE_URL'])
-    connect = PG.connect(uri.hostname, uri.port, nil, nil, uri.path[1..-1], uri.user, uri.password)
-    results = connect.exec('select ngword from ngwords')
-
-    results.each do |result|
-      @ngwords.push(result['ngword'])
-      if result['ngword'].match?(/\p{hiragana}/) then
-        @ngwords.push(result['ngword'].tr('ぁ-ん', 'ァ-ン'))
-      elsif result['ngword'].match?(/\p{katakana}/) then
-        @ngwords.push(result['ngword'].tr('ァ-ン', 'ぁ-ん'))
-      end
+    File.foreach("ngword.txt") do |line|
+      @ngwords << line.chomp
     end
-    connect.finish
+    p @ngwords
   end
 
-  def ngword?(tweet_text)
-    @ngwords.any?{|nw| tweet_text.include?(nw)}
+  def ngwords?(ngword)
+    @ngwords.include?(ngword)
   end
 end
-
-=end
 
 $yukimi_twitter = YukimiTwitter.new
 

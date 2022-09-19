@@ -1,7 +1,6 @@
-=begin
 require 'twitter'
 require 'natto'
-=end
+
 class YukimiTwitter
   def initialize
     @client = Twitter::REST::Client.new do |config|
@@ -142,5 +141,69 @@ class Ngword
   end
 end
 
-ng = Ngword.new
+$yukimi_twitter = YukimiTwitter.new
 
+timeline_tweet = Thread.new do
+  parser = Parser.new
+  loop do
+    tweet_data = $yukimi_twitter.get_tweet_data.sample
+    p tweet_data
+    tweet_text = tweet_data[:tweet_text]
+    tweet_id = tweet_data[:tweet_id]
+    yukimi_tweet = parser.change_yukimi(tweet_text)
+    puts('tweet', yukimi_tweet)
+    puts yukimi_tweet.size
+    $yukimi_twitter.tweet(yukimi_tweet)
+    $yukimi_twitter.favorite(tweet_id)
+    sleep(900)
+  end
+end
+
+reply_tweet = Thread.new do
+  parser = Parser.new
+  yukimi_tweet_id = []
+  $yukimi_twitter.get_reply.each do |tweet|
+    yukimi_tweet_id.push(tweet.id)
+  end
+  loop do
+    yukimi_reply = $yukimi_twitter.get_reply
+    yukimi_reply.each do |tweet|
+      next if yukimi_tweet_id.include?(tweet.id)
+
+      tweet_text = $yukimi_twitter.get_tweet_texts.sample
+      yukimi_tweet = parser.change_yukimi(tweet_text)
+      $yukimi_twitter.reply("@#{tweet.user.screen_name} #{yukimi_tweet}", { in_reply_to_status_id: tweet.id })
+      puts('replied')
+      $yukimi_twitter.favorite(tweet.id)
+      yukimi_tweet_id.push(tweet.id)
+    end
+    sleep(60)
+  end
+end
+
+update = Thread.new do
+  loop do
+    sleep(900)
+    $yukimi_twitter.update_tweet
+  end
+end
+
+remove = Thread.new do
+  loop do
+    follower_ids = $yukimi_twitter.get_follower_id
+    followee_ids = $yukimi_twitter.get_followee_id
+
+    users_ids = followee_ids - follower_ids
+    for user_id in users_ids do 
+      $yukimi_twitter.remove(user_id)
+    end
+    sleep(900)
+  end
+end
+
+if __FILE__ == $0
+  timeline_tweet.join
+  reply_tweet.join
+  update.join
+  remove.join
+end

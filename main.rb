@@ -4,10 +4,10 @@ require 'natto'
 class YukimiTwitter
   def initialize
     @client = Twitter::REST::Client.new do |config|
-      config.consumer_key    = ENV['MY_CONSUMER_KEY']
-      config.consumer_secret = ENV['MY_CONSUMER_SECRET']
-      config.access_token    = ENV['MY_ACCESS_TOKEN']
-      config.access_token_secret = ENV['MY_ACCESS_TOKEN_SECRET']
+      config.consumer_key    = ENV.fetch('MY_CONSUMER_KEY')
+      config.consumer_secret = ENV.fetch('MY_CONSUMER_SECRET')
+      config.access_token    = ENV.fetch('MY_ACCESS_TOKEN')
+      config.access_token_secret = ENV.fetch('MY_ACCESS_TOKEN_SECRET')
     end
     @timeline_tweet_data = []
     @ngword = Ngword.new
@@ -20,16 +20,16 @@ class YukimiTwitter
     end
   end
 
-  def get_tweet_data
+  def tweet_data
     @timeline_tweet_data
   end
 
-  def get_tweet_texts
+  def tweet_texts
     #@timeline_tweet_dataのkeyがtweet_textな物を配列として返す
     @timeline_tweet_data.map {|ttd| ttd[:tweet_text]}
   end
 
-  def get_tweet_ids
+  def tweet_ids
     #@timeline_tweet_dataのkeyがtweet_ idな物を配列として返す
     @timeline_tweet_data.map {|ttd| ttd[:tweet_id]}
   end
@@ -46,7 +46,7 @@ class YukimiTwitter
     @timeline_tweet_data = tweet_data
   end
 
-  def get_reply
+  def reply
     yukimi_tweet = []
     @client.mentions_timeline.each do |tweet|
       yukimi_tweet.push(tweet)
@@ -54,23 +54,19 @@ class YukimiTwitter
     yukimi_tweet
   end
 
-  def tweet(str)
-    @client.update(str)
+  def tweet(message, options = nil)
+    @client.update(message, options)
   end
 
-  def reply(str, option)
-    @client.update(str,  options = option)
+  def follower_id
+    @client.follower_ids.map{ |follower| follower }
   end
 
-  def get_follower_id
-    @client.follower_ids.map{|follower| follower}
+  def followee_id
+    @client.friend_ids.map{ |followee| followee }
   end
 
-  def get_followee_id
-    @client.friend_ids.map{|followee| followee}
-  end
-
-  def get_users(user_id)
+  def users(user_id)
     @client.users(user_id)
   end
 
@@ -106,19 +102,18 @@ class Parser
       analyzed_tweets.push('ふふ')
       rand(1..4).times { analyzed_tweets.push('…') }
     end
-    yukimi_tweet = analyzed_tweets.join
-    new_str = ''
-    yukimi_tweet.each_char do |s|
+    yukimi_tweet = ''
+    analyzed_tweets.join.each_char do |s|
       if s == '#'
-        new_str += "\n"
-        new_str.delete!('…')
+        yukimi_tweet += "\n"
+        yukimi_tweet.delete!('…')
       end
-      new_str += s
+      yukimi_tweet += s
     end
-    if 150 < new_str.size then
+    if 150 < yukimi_tweet.size
       change_yukimi(markov_chain_text)
     else
-      new_str
+      yukimi_tweet
     end
   end
 end
@@ -128,16 +123,16 @@ class Ngword
     @ngwords = []
     File.foreach("ngword.txt") do |line|
       @ngwords.push(line.chomp)
-      if line.chomp.match?(/\p{hiragana}/) then
+      if line.chomp.match?(/\p{hiragana}/)
         @ngwords.push(line.chomp.tr('ぁ-ん', 'ァ-ン'))
-      elsif line.chomp.match?(/\p{katakana}/) then
+      elsif line.chomp.match?(/\p{katakana}/)
         @ngwords.push(line.chomp.tr('ァ-ン', 'ぁ-ん'))
       end
     end
   end
 
   def ngword?(tweet_text)
-    @ngwords.any?{|nw| tweet_text.include?(nw)}
+    @ngwords.any? { |nw| tweet_text.include?(nw) }
   end
 end
 
@@ -146,7 +141,7 @@ $yukimi_twitter = YukimiTwitter.new
 timeline_tweet = Thread.new do
   parser = Parser.new
   loop do
-    tweet_data = $yukimi_twitter.get_tweet_data.sample
+    tweet_data = $yukimi_twitter.tweet_data.sample
     p tweet_data
     tweet_text = tweet_data[:tweet_text]
     tweet_id = tweet_data[:tweet_id]
@@ -162,17 +157,17 @@ end
 reply_tweet = Thread.new do
   parser = Parser.new
   yukimi_tweet_id = []
-  $yukimi_twitter.get_reply.each do |tweet|
+  $yukimi_twitter.reply.each do |tweet|
     yukimi_tweet_id.push(tweet.id)
   end
   loop do
-    yukimi_reply = $yukimi_twitter.get_reply
+    yukimi_reply = $yukimi_twitter.reply
     yukimi_reply.each do |tweet|
       next if yukimi_tweet_id.include?(tweet.id)
 
-      tweet_text = $yukimi_twitter.get_tweet_texts.sample
+      tweet_text = $yukimi_twitter.tweet_texts.sample
       yukimi_tweet = parser.change_yukimi(tweet_text)
-      $yukimi_twitter.reply("@#{tweet.user.screen_name} #{yukimi_tweet}", { in_reply_to_status_id: tweet.id })
+      $yukimi_twitter.tweet("@#{tweet.user.screen_name} #{yukimi_tweet}", { in_reply_to_status_id: tweet.id })
       puts('replied')
       $yukimi_twitter.favorite(tweet.id)
       yukimi_tweet_id.push(tweet.id)
@@ -190,11 +185,11 @@ end
 
 remove = Thread.new do
   loop do
-    follower_ids = $yukimi_twitter.get_follower_id
-    followee_ids = $yukimi_twitter.get_followee_id
+    follower_ids = $yukimi_twitter.follower_id
+    followee_ids = $yukimi_twitter.followee_id
 
     users_ids = followee_ids - follower_ids
-    for user_id in users_ids do 
+    users_ids.each do |user_id|
       $yukimi_twitter.remove(user_id)
     end
     sleep(900)

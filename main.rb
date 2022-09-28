@@ -12,41 +12,41 @@ class YukimiTwitter
     @timeline_tweet_data = []
     @ngword = Ngword.new
     @client.home_timeline({ count: 100 }).each do |tweet|
-      unless tweet.text.include?('RT') || tweet.text.include?('@') \
-              || tweet.text.include?('http') || tweet.user.screen_name.include?('YukimiLearning') \
-              || @ngword.ngword?(tweet.text) || (tweet.text.size > 100)
-        @timeline_tweet_data.push({"tweet_text": tweet.text, "tweet_id": tweet.id})
-      end
+      next if ['RT', '@', 'http'].any? { |remove_str| tweet.text.include?(remove_str) } \
+        || tweet.user.screen_name.include?('YukimiLearning') || @ngword.ngword?(tweet.text) \
+        || (tweet.text.size > 100)
+
+      @timeline_tweet_data.push({ tweet_text: tweet.text, tweet_id: tweet.id })
     end
   end
 
-  def tweet_data
+  def self.tweet_data
     @timeline_tweet_data
   end
 
-  def tweet_texts
-    #@timeline_tweet_dataのkeyがtweet_textな物を配列として返す
-    @timeline_tweet_data.map {|ttd| ttd[:tweet_text]}
+  def self.tweet_texts
+    # @timeline_tweet_dataのkeyがtweet_textな物を配列として返す
+    @timeline_tweet_data.map { |ttd| ttd[:tweet_text] }
   end
 
-  def tweet_ids
-    #@timeline_tweet_dataのkeyがtweet_ idな物を配列として返す
-    @timeline_tweet_data.map {|ttd| ttd[:tweet_id]}
+  def self.tweet_ids
+    # @timeline_tweet_dataのkeyがtweet_ idな物を配列として返す
+    @timeline_tweet_data.map { |ttd| ttd[:tweet_id] }
   end
 
-  def update_tweet
+  def self.update_tweet
     tweet_data = []
     @client.home_timeline({ count: 100 }).each do |tweet|
-      unless tweet.text.include?('RT') || tweet.text.include?('@') \
-        || tweet.text.include?('http') || tweet.user.screen_name.include?('YukimiLearning') \
-        || @ngword.ngword?(tweet.text) || (tweet.text) || (tweet.text.size > 100)
-        tweet_data.push({"tweet_text": tweet.text, "tweet_id": tweet.id})
-      end
+      next if ['RT', '@', 'http'].any? { |remove_str| tweet.text.include?(remove_str) } \
+        || tweet.user.screen_name.include?('YukimiLearning') || @ngword.ngword?(tweet.text) \
+        || (tweet.text.size > 100)
+
+      @timeline_tweet_data.push({ tweet_text: tweet.text, tweet_id: tweet.id })
     end
     @timeline_tweet_data = tweet_data
   end
 
-  def reply
+  def self.reply
     yukimi_tweet = []
     @client.mentions_timeline.each do |tweet|
       yukimi_tweet.push(tweet)
@@ -54,27 +54,27 @@ class YukimiTwitter
     yukimi_tweet
   end
 
-  def tweet(message, options = nil)
+  def self.tweet(message, options = nil)
     @client.update(message, options)
   end
 
-  def follower_id
-    @client.follower_ids.map{ |follower| follower }
+  def self.follower_id
+    @client.follower_ids.map { |follower| follower }
   end
 
-  def followee_id
-    @client.friend_ids.map{ |followee| followee }
+  def self.followee_id
+    @client.friend_ids.map { |followee| followee }
   end
 
-  def users(user_id)
+  def self.users(user_id)
     @client.users(user_id)
   end
 
-  def remove(user_id)
+  def self.remove(user_id)
     @client.unfollow(user_id)
   end
 
-  def favorite(user_id)
+  def self.favorite(user_id)
     @client.favorite(user_id)
   end
 end
@@ -87,7 +87,7 @@ class Parser
     p markov_chain_text
     nm = Natto::MeCab.new
     analyzed_tweets = []
-    rand(1..4).times { analyzed_tweets.push('…') } if rand(4) == 0
+    rand(1..4).times { analyzed_tweets.push('…') } if rand(4).zero?
     nm.parse(markov_chain_text) do |n|
       part_of_speech = ''
       analyzed_tweets.push(n.surface)
@@ -95,9 +95,9 @@ class Parser
         part_of_speech += block
         break if block == '詞'
       end
-      rand(1..4).times { analyzed_tweets.push('…') } if part_of_speech == '副詞' || part_of_speech == '助詞'
+      rand(1..4).times { analyzed_tweets.push('…') } if %w(副詞 助詞).include?(part_of_speech)
     end
-    if rand(9) == 0
+    if rand(9).zero?
       rand(1..4).times { analyzed_tweets.push('…') }
       analyzed_tweets.push('ふふ')
       rand(1..4).times { analyzed_tweets.push('…') }
@@ -105,23 +105,19 @@ class Parser
     yukimi_tweet = ''
     analyzed_tweets.join.each_char do |s|
       if s == '#'
-        yukimi_tweet += "\n"
+        yukimi_tweet += '\n'
         yukimi_tweet.delete!('…')
       end
       yukimi_tweet += s
     end
-    if 150 < yukimi_tweet.size
-      change_yukimi(markov_chain_text)
-    else
-      yukimi_tweet
-    end
+    yukimi_tweet.size > 150 ? change_yukimi(markov_chain_text) : yukimi_tweet
   end
 end
 
 class Ngword
   def initialize
     @ngwords = []
-    File.foreach("ngword.txt") do |line|
+    File.foreach('ngword.txt') do |line|
       @ngwords.push(line.chomp)
       if line.chomp.match?(/\p{hiragana}/)
         @ngwords.push(line.chomp.tr('ぁ-ん', 'ァ-ン'))
@@ -136,20 +132,18 @@ class Ngword
   end
 end
 
-$yukimi_twitter = YukimiTwitter.new
-
 timeline_tweet = Thread.new do
   parser = Parser.new
   loop do
-    tweet_data = $yukimi_twitter.tweet_data.sample
+    tweet_data = YukimiTwitter.tweet_data.sample
     p tweet_data
     tweet_text = tweet_data[:tweet_text]
     tweet_id = tweet_data[:tweet_id]
     yukimi_tweet = parser.change_yukimi(tweet_text)
     puts('tweet', yukimi_tweet)
     puts yukimi_tweet.size
-    $yukimi_twitter.tweet(yukimi_tweet)
-    $yukimi_twitter.favorite(tweet_id)
+    YukimiTwitter.tweet(yukimi_tweet)
+    YukimiTwitter.favorite(tweet_id)
     sleep(900)
   end
 end
@@ -157,19 +151,19 @@ end
 reply_tweet = Thread.new do
   parser = Parser.new
   yukimi_tweet_id = []
-  $yukimi_twitter.reply.each do |tweet|
+  YukimiTwitter.reply.each do |tweet|
     yukimi_tweet_id.push(tweet.id)
   end
   loop do
-    yukimi_reply = $yukimi_twitter.reply
+    yukimi_reply = YukimiTwitter.reply
     yukimi_reply.each do |tweet|
       next if yukimi_tweet_id.include?(tweet.id)
 
-      tweet_text = $yukimi_twitter.tweet_texts.sample
+      tweet_text = YukimiTwitter.tweet_texts.sample
       yukimi_tweet = parser.change_yukimi(tweet_text)
-      $yukimi_twitter.tweet("@#{tweet.user.screen_name} #{yukimi_tweet}", { in_reply_to_status_id: tweet.id })
+      YukimiTwitter.tweet("@#{tweet.user.screen_name} #{yukimi_tweet}", { in_reply_to_status_id: tweet.id })
       puts('replied')
-      $yukimi_twitter.favorite(tweet.id)
+      YukimiTwitter.favorite(tweet.id)
       yukimi_tweet_id.push(tweet.id)
     end
     sleep(60)
@@ -179,26 +173,24 @@ end
 update = Thread.new do
   loop do
     sleep(900)
-    $yukimi_twitter.update_tweet
+    YukimiTwitter.update_tweet
   end
 end
 
 remove = Thread.new do
   loop do
-    follower_ids = $yukimi_twitter.follower_id
-    followee_ids = $yukimi_twitter.followee_id
+    follower_ids = YukimiTwitter.follower_id
+    followee_ids = YukimiTwitter.followee_id
 
     users_ids = followee_ids - follower_ids
     users_ids.each do |user_id|
-      $yukimi_twitter.remove(user_id)
+      YukimiTwitter.remove(user_id)
     end
     sleep(900)
   end
 end
 
-if __FILE__ == $0
-  timeline_tweet.join
-  reply_tweet.join
-  update.join
-  remove.join
-end
+timeline_tweet.join
+reply_tweet.join
+update.join
+remove.join

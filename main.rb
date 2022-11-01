@@ -19,22 +19,22 @@ class YukimiTwitter
       @timeline_tweet_data.push({ tweet_text: tweet.text, tweet_id: tweet.id })
     end
   end
-
-  def self.tweet_data
+  class << self
+  def tweet_data
     @timeline_tweet_data
   end
 
-  def self.tweet_texts
+  def tweet_texts
     # @timeline_tweet_dataのkeyがtweet_textな物を配列として返す
     @timeline_tweet_data.map { |ttd| ttd[:tweet_text] }
   end
 
-  def self.tweet_ids
+  def tweet_ids
     # @timeline_tweet_dataのkeyがtweet_ idな物を配列として返す
     @timeline_tweet_data.map { |ttd| ttd[:tweet_id] }
   end
 
-  def self.update_tweet
+  def update_tweet
     tweet_data = []
     @client.home_timeline({ count: 100 }).each do |tweet|
       next if ['RT', '@', 'http'].any? { |remove_str| tweet.text.include?(remove_str) } \
@@ -46,7 +46,7 @@ class YukimiTwitter
     @timeline_tweet_data = tweet_data
   end
 
-  def self.reply
+  def reply
     yukimi_tweet = []
     @client.mentions_timeline.each do |tweet|
       yukimi_tweet.push(tweet)
@@ -54,27 +54,27 @@ class YukimiTwitter
     yukimi_tweet
   end
 
-  def self.tweet(message, options = nil)
+  def tweet(message, options = nil)
     @client.update(message, options)
   end
 
-  def self.follower_id
+  def follower_id
     @client.follower_ids.map { |follower| follower }
   end
 
-  def self.followee_id
+  def followee_id
     @client.friend_ids.map { |followee| followee }
   end
 
-  def self.users(user_id)
+  def users(user_id)
     @client.users(user_id)
   end
 
-  def self.remove(user_id)
+  def remove(user_id)
     @client.unfollow(user_id)
   end
 
-  def self.favorite(user_id)
+  def favorite(user_id)
     @client.favorite(user_id)
   end
 end

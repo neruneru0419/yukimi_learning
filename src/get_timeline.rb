@@ -6,7 +6,7 @@ module GetTimeline
       "expansions" => "author_id"            
     }
     url = "https://api.twitter.com/2/users/#{user_id}/timelines/reverse_chronological?#{URI.encode_www_form(query)}"
-    puts url
+
     options = {
       :method => :get,
       headers: {

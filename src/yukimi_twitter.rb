@@ -3,6 +3,7 @@ require "json"
 require "oauth"
 
 require_relative "twitter/get_timeline"
+require_relative "twitter/get_tweet"
 require_relative "twitter/get_user_id"
 require_relative "twitter/get_mention"
 require_relative "twitter/get_users"

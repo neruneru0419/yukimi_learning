@@ -1,22 +1,21 @@
 module GetTweet
-  def get_tweet(url, params, format: "json")
-    options = {
-      method: 'get',
-      headers: {
-        "Authorization" => "Bearer #{@bearer_token}"
-        },
-      params: params
+  def get_tweet(tweet_ids, format: "json")
+    query = {
+      "ids" => tweet_ids,
+      "tweet.fields" => "conversation_id,created_at,public_metrics,id,referenced_tweets",
+      "media.fields" => "url",
+      "user.fields" => "description,username,url",
+      "expansions" => "author_id"            
     }
 
-    request = Typhoeus::Request.new(url, options)
-    response = request.run
-    
-    if format == "ruby"
-        return JSON.parse(response.body.to_s) 
-    elsif format == "code"
-        return response.code 
-    else
-        return JSON.pretty_generate(JSON.parse(response.body))
-    end
+    url = "https://api.twitter.com/2/tweets"
+
+    options = {
+      :method => :get,
+      headers: {
+            "content-type": "application/json"
+      }
+    }
+    oauth1_request(url, options)
   end
 end

@@ -14,6 +14,7 @@ require_relative "twitter/delete_remove"
 module YukimiTwitter
   class Twitter
     include GetTimeline
+    include GetTweet
     include GetUserId
     include GetMention
     include GetUsers

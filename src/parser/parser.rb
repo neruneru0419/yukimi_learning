@@ -1,9 +1,10 @@
+require "natto"
 module Parser
-  def change_yukimi(markov_chain_text)
+  def change_yukimi(text)
     nm = Natto::MeCab.new
     analyzed_tweets = []
     rand(1..4).times { analyzed_tweets.push('…') } if rand(4) == 0
-    nm.parse(markov_chain_text) do |n|
+    nm.parse(text) do |n|
       part_of_speech = ''
       analyzed_tweets.push(n.surface)
       n.feature.each_char do |block|
@@ -17,19 +18,13 @@ module Parser
       analyzed_tweets.push('ふふ')
       rand(1..4).times { analyzed_tweets.push('…') }
     end
+
     yukimi_tweet = analyzed_tweets.join
-    new_str = ''
-    yukimi_tweet.each_char do |s|
-      if s == '#'
-        new_str += "\n"
-        new_str.delete!('…')
-      end
-      new_str += s
-    end
-    if 150 < new_str.size then
-      change_yukimi(markov_chain_text)
+
+    if 150 < yukimi_tweet.size then
+      change_yukimi(text)
     else
-      new_str
+      yukimi_tweet
     end
   end
 end

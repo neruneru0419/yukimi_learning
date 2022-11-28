@@ -82,6 +82,7 @@ class YukimiTwitter
     @client.favorite(user_id)
   end
 end
+=begin
 class Parser
   def initialize
     @nm = Natto::MeCab.new
@@ -122,7 +123,9 @@ class Parser
     end
   end
 end
+-end
 
+=begin
 class Ngword
   def initialize
     @ngwords = []
@@ -140,7 +143,7 @@ class Ngword
     @ngwords.any?{|nw| tweet_text.include?(nw)}
   end
 end
-
+=end
 $yukimi_twitter = YukimiTwitter.new
 
 timeline_tweet = Thread.new do

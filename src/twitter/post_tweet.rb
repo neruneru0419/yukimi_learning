@@ -10,7 +10,6 @@ module PostTweet
       "text": text
     }
 
-    {"text": "Excited!", "reply": {"in_reply_to_tweet_id": "1455953449422516226"}}
     options = {
       :method => :post,
       headers: {

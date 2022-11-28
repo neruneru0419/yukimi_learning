@@ -1,5 +1,5 @@
-module GetTwitter
-  def get_twitter(url, params, format: "json")
+module GetTweet
+  def get_tweet(url, params, format: "json")
     options = {
       method: 'get',
       headers: {
@@ -7,7 +7,7 @@ module GetTwitter
         },
       params: params
     }
-    
+
     request = Typhoeus::Request.new(url, options)
     response = request.run
     

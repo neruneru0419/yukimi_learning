@@ -1,60 +1,34 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    addressable (2.8.0)
-      public_suffix (>= 2.0.2, < 5.0)
-    buftok (0.2.0)
-    domain_name (0.5.20190701)
-      unf (>= 0.0.5, < 1.0.0)
-    equalizer (0.0.11)
-    ffi (1.13.1)
-    ffi-compiler (1.0.1)
-      ffi (>= 1.0.0)
-      rake
-    http (4.4.1)
-      addressable (~> 2.3)
-      http-cookie (~> 1.0)
-      http-form_data (~> 2.2)
-      http-parser (~> 1.2.0)
-    http-cookie (1.0.3)
-      domain_name (~> 0.5)
-    http-form_data (2.3.0)
-    http-parser (1.2.2)
-      ffi-compiler
-    http_parser.rb (0.6.0)
-    memoizable (0.4.2)
-      thread_safe (~> 0.3, >= 0.3.1)
-    multipart-post (2.1.1)
-    natto (1.2.0)
-      ffi (>= 1.9.0)
-    naught (1.1.0)
-    pg (1.2.3)
-    public_suffix (4.0.6)
-    rake (13.0.1)
-    simple_oauth (0.3.1)
-    thread_safe (0.3.6)
-    twitter (7.0.0)
-      addressable (~> 2.3)
-      buftok (~> 0.2.0)
-      equalizer (~> 0.0.11)
-      http (~> 4.0)
-      http-form_data (~> 2.0)
-      http_parser.rb (~> 0.6.0)
-      memoizable (~> 0.4.0)
-      multipart-post (~> 2.0)
-      naught (~> 1.0)
-      simple_oauth (~> 0.3.0)
-    unf (0.1.4)
-      unf_ext
-    unf_ext (0.0.7.7)
+    ethon (0.16.0)
+      ffi (>= 1.15.0)
+    ffi (1.15.5)
+    hashie (5.0.0)
+    json (2.6.2)
+    oauth (1.1.0)
+      oauth-tty (~> 1.0, >= 1.0.1)
+      snaky_hash (~> 2.0)
+      version_gem (~> 1.1)
+    oauth-tty (1.0.5)
+      version_gem (~> 1.1, >= 1.1.1)
+    snaky_hash (2.0.1)
+      hashie
+      version_gem (~> 1.1, >= 1.1.1)
+    typhoeus (1.4.0)
+      ethon (>= 0.9.0)
+    version_gem (1.1.1)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  natto
-  pg
-  twitter
+  json
+  oauth
+  typhoeus
+
+RUBY VERSION
+   ruby 2.7.6p219
 
 BUNDLED WITH
    2.1.4

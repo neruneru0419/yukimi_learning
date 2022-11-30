@@ -8,7 +8,7 @@ module GetTweet
       "expansions" => "author_id"            
     }
 
-    url = "https://api.twitter.com/2/tweets"
+    url = "https://api.twitter.com/2/tweets?#{URI.encode_www_form(query)}"
 
     options = {
       :method => :get,

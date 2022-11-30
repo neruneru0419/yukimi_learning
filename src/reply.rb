@@ -31,16 +31,35 @@ end
 def reply
   include YukimiTwitter
   include Parser
+  
+  user_name = "runeru_runerune"
+  user_id = get_user_id(user_name)["data"][0]["id"]
+  reply_data = get_mention(user_id)["data"].first
+  reply_id = reply_data["id"]
+  author_id = reply_data["author_id"]
+  yukimi_tweets = get_user_timeline(user_id)["data"]
 
-  yukimi_twitter = Twitter.new
-  user_id = yukimi_twitter.get_user_id("runeru_runerune")["data"][0]["id"]
-  reply_id = yukimi_twitter.get_mention(user_id)["data"].first["id"]
-  mention_text = "うんち" # ここuser_timelineから取得する
-  # yukimi_reply = parser.change_yukimi(mention_text)
-  # 既にリプライが送られていた場合はリプライしない
-  yukimi_twitter.post_reply(mention_text, reply_id)
+  unless reply_to_author?(user_id, reply_id)
+    mention_data = get_user_timeline(author_id)["data"]
+    mention_text = mention_data.sample["text"]
+    reply_text = change_yukimi(mention_text)
+    post_reply("reply_text", reply_id)
+  end
 end
-p reply
+
+def reply_to_author?(user_id, reply_id)
+  yukimi_tweets = get_user_timeline(user_id)["data"]
+
+  yukimi_tweets.each do |mention|
+    unless mention["referenced_tweets"].nil?
+      referenced_tweets_id = mention["referenced_tweets"][0]["id"]
+      return true if reply_id == referenced_tweets_id
+    end
+  end
+  false
+end
+
+reply
 =begin
 parser = Parser.new
 yukimi_tweet_id = []

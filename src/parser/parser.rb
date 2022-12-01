@@ -13,7 +13,7 @@ module Parser
       end
       rand(1..4).times { analyzed_tweets.push('…') } if part_of_speech == '副詞' || part_of_speech == '助詞'
     end
-    if rand(9) == 0
+    if rand(8) == 0
       rand(1..4).times { analyzed_tweets.push('…') }
       analyzed_tweets.push('ふふ')
       rand(1..4).times { analyzed_tweets.push('…') }

@@ -1,5 +1,5 @@
-module GetTweet
-  def get_tweet(tweet_ids, format: "json")
+module GetUserTweet
+  def get_user_tweet(tweet_ids, format: "json")
     query = {
       "ids" => tweet_ids,
       "tweet.fields" => "conversation_id,created_at,public_metrics,id,referenced_tweets",

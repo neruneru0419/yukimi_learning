@@ -5,7 +5,7 @@ module GetMention
       "user.fields" => "description",
       "expansions" => "attachments.poll_ids,attachments.media_keys,author_id,in_reply_to_user_id"            
     }
-    url = "https://api.twitter.com/2/users/#{user_id}/mentions?max_results=100&#{URI.encode_www_form(query)}"
+    url = "https://api.twitter.com/2/users/#{user_id}/mentions?&#{URI.encode_www_form(query)}"
     options = {
       :method => :get,
       headers: {

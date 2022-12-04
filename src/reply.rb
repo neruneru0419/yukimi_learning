@@ -42,11 +42,10 @@ end
 
 def get_mention_text(mention_data)
   mention_text = mention_data.sample["text"]
-  if mention_text.include?("http") || mention_text.include?("#")
+  if mention_text.include?("http") || mention_text.include?("#") || ngword?(timeline_text)
     get_mention_text(mention_data)
   else
     mention_text    
   end
 end
 
-reply

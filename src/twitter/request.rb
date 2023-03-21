@@ -9,7 +9,6 @@ module Request
     api_key_secret = ENV["api_key_secret"]
     access_token = ENV["access_token"]
     access_token_secret = ENV["access_token_secret"]
-    bearer_token = ENV["bearer_token"]
     client = OAuth::Consumer.new(api_key, api_key_secret, :site => 'https://api.twitter.com',
                                                           :authorize_path => '/oauth/authenticate',
                                                           :debug_output => false)

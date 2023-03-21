@@ -1,7 +1,8 @@
 source 'https://rubygems.org'
 
-ruby '2.7.6'
+ruby '2.7.7'
 
 gem "typhoeus"
 gem "oauth"
-gem "json"
+gem "byebug"
+gem "natto"

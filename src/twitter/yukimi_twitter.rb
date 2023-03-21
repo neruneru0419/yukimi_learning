@@ -27,5 +27,5 @@ module YukimiTwitter
   include PostReply
   include PostTweet
 
-  UserName = "runeru_runerune"
+  UserName = "YukimiLearning"
 end

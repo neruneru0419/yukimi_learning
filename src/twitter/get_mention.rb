@@ -3,7 +3,8 @@ module GetMention
     query = {
       "tweet.fields" => "attachments,author_id,conversation_id,created_at,entities,id,lang,referenced_tweets",
       "user.fields" => "description",
-      "expansions" => "attachments.poll_ids,attachments.media_keys,author_id,in_reply_to_user_id"            
+      "expansions" => "attachments.poll_ids,attachments.media_keys,author_id,in_reply_to_user_id",
+      "max_results" => "100"
     }
     url = "https://api.twitter.com/2/users/#{user_id}/mentions?&#{URI.encode_www_form(query)}"
     options = {

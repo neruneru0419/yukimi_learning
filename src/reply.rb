@@ -16,7 +16,7 @@ module LambdaFunction
     def self.process(event:, context:)
       user_id = get_user_id(UserName)["data"][0]["id"]
       max_results = 20
-      reply_data = get_mention(user_id, max_results)["data"]
+      reply_data = get_mention(user_id, max_results)["data"].select{|reply| reply["text"].count("@") == 1}
       reply_data.each do |reply|
         reply_id = reply["id"]
         author_id = reply["author_id"]

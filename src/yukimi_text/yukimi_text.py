@@ -1,15 +1,14 @@
-import MeCab
 import random
+import MeCab
 
 def change_yukimi(text):
     tagger = MeCab.Tagger()
-    analyzed_tweets = []
-
     if random.randint(0, 3) == 0:
-        for _ in range(random.randint(1, 4)):
-            analyzed_tweets.append("…")
-
+        analyzed_tweets = ["…"] * random.randint(1, 4) # 文頭に25%の確率で三点リーダを付ける
+    else:
+        analyzed_tweets = []
     node = tagger.parseToNode(text)
+
     while node:
         part_of_speech = ''
         analyzed_tweets.append(node.surface)
@@ -17,23 +16,12 @@ def change_yukimi(text):
             part_of_speech += block
             if block == '詞':
                 break
-        if part_of_speech == '副詞' or part_of_speech == '助詞':
-            for _ in range(random.randint(1, 4)):
-                analyzed_tweets.append("…")
+        if part_of_speech == '副詞' or part_of_speech == '助詞': # 文章の区切りに25%で三点リーダを付ける
+            analyzed_tweets.append("…" * random.randint(1, 4))
 
         node = node.next
 
     if random.randint(0, 7) == 0:
-        for _ in range(random.randint(1, 4)):
-            analyzed_tweets.append("…")
-        analyzed_tweets.append("ふふ")
-        for _ in range(random.randint(1, 4)):
-            analyzed_tweets.append("…")
+        analyzed_tweets.append("…" * random.randint(1, 4) + "ふふ" + "…" * random.randint(1, 4))
 
-    yukimi_tweet = "".join(analyzed_tweets)
-
-    if len(yukimi_tweet) > 150:
-        return change_yukimi(text)
-    else:
-        return yukimi_tweet
-change_yukimi("これはテストです")
+    return "".join(analyzed_tweets)

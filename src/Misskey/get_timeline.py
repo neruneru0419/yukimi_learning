@@ -29,6 +29,7 @@ def mk_misskey_list():
             text_list.append(text)
     return text_list
 
+# ToDo:この部分をmfm-jsでデコードするようにする
 def get_tl_misskey():
     text_list = []
     response = requests.post(
@@ -59,4 +60,4 @@ def get_tl_misskey():
     return text_list
 
 
-print(get_tl_misskey())
+# print(get_tl_misskey())

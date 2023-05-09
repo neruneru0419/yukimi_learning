@@ -1,1 +1,4 @@
 .env
+src/Misskey/node_modules
+config.json
+data/get_timeline_list.txt

@@ -5,7 +5,7 @@ from misskey import Misskey
 import json
 import requests
 
-with open('../../config.json', 'r') as json_file:
+with open('../config.json', 'r') as json_file:
     config = json.load(json_file)
 
 #Misskey.py API
@@ -23,7 +23,7 @@ get_tl_json_data = {
 
 def mk_misskey_list():
     text_list = []
-    with open("../../data/get_timeline_list.txt", encoding='utf-8') as data:
+    with open("../data/get_timeline_list.txt", encoding='utf-8') as data:
         for line in data:
             text = line.rstrip('\n')
             text_list.append(text)
@@ -54,9 +54,10 @@ def get_tl_misskey():
         line = line.replace(' ', "")
         deq_list = line in text_list
         if line != "None" and line != "" and deq_list == False:
-            with open('../../data/get_timeline_list.txt', 'a',encoding='utf-8') as f:
-                print(line, file=f)
+            # with open('../data/get_timeline_list.txt', 'a',encoding='utf-8') as f:
+                # print(line, file=f)
             text_list.append(line)
+
     return text_list
 
 

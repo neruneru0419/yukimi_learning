@@ -2,3 +2,6 @@
 src/Misskey/node_modules
 config.json
 data/get_timeline_list.txt
+src/__pycache__
+src/Misskey/__pycache__
+src/yukimi_text/__pycache__

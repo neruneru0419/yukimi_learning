@@ -13,7 +13,7 @@ misskey = Misskey(config['token']['server'], i= config['token']['i'])
 
 #Misskey API json request用
 get_tl_url = "https://" + config['token']['server'] + "/api/notes/timeline"
-limit = 30
+limit = 15
 get_tl_json_data = {
     "i" : config["token"]["i"],
     "limit": limit,

@@ -1,3 +1,4 @@
+
 import re
 from collections import deque
 from misskey import Misskey
@@ -36,4 +37,3 @@ async def on_follow(user):
   except:
     pass
   
-

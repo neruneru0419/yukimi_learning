@@ -4,6 +4,8 @@ from collections import deque
 from misskey import Misskey
 import json
 import websockets
+import asyncio
+
 
 with open('../config.json', 'r') as json_file:
     config = json.load(json_file)
@@ -37,3 +39,5 @@ async def on_follow(user):
   except:
     pass
   
+
+asyncio.get_event_loop().run_until_complete(follow_back())

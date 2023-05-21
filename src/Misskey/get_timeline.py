@@ -23,7 +23,6 @@ get_tl_json_data = {
 
 # ToDo:この部分をmfm-jsでデコードするようにする
 def get_tl_misskey():
-    text_list = []
     response = requests.post(
         get_tl_url,
         json.dumps(get_tl_json_data),
@@ -32,7 +31,20 @@ def get_tl_misskey():
     choice_note = random.choice(hash)
     choice_id = str(choice_note["id"]) 
     choice_text = str(choice_note["text"])
+    line = re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", choice_text)
+    line = re.sub(r'@.*', "", line)
+    line = re.sub(r'#.*', "", line)
+    line = re.sub(r':.*', "", line)
+    line = re.sub(r"<[^>]*?>", "", line)
+    line = re.sub(r"\(.*", "", line)
+    line = line.replace('\\', "")
+    line = line.replace('*', "")
+    line = line.replace('\n', "")
+    line = line.replace('\u3000', "")
+    line = line.replace('俺', "私")
+    line = line.replace('僕', "私")
+    line = line.replace(' ', "")
     misskey.notes_reactions_create(choice_id,"❤️")
-    return(choice_text)
+    return(line)
 
-# print(get_tl_misskey())
+print(get_tl_misskey())

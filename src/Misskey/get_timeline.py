@@ -21,14 +21,6 @@ get_tl_json_data = {
 
 
 
-def mk_misskey_list():
-    text_list = []
-    with open("../data/get_timeline_list.txt", encoding='utf-8') as data:
-        for line in data:
-            text = line.rstrip('\n')
-            text_list.append(text)
-    return text_list
-
 # ToDo:この部分をmfm-jsでデコードするようにする
 def get_tl_misskey():
     text_list = []
@@ -37,28 +29,10 @@ def get_tl_misskey():
         json.dumps(get_tl_json_data),
         headers={'Content-Type': 'application/json'})
     hash = response.json()
-    for num in range(limit):
-        line = str(hash[num]["text"])
-        line = re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", line)
-        line = re.sub(r'@.*', "", line)
-        line = re.sub(r'#.*', "", line)
-        line = re.sub(r':.*', "", line)
-        line = re.sub(r"<[^>]*?>", "", line)
-        line = re.sub(r"\(.*", "", line)
-        line = line.replace('\\', "")
-        line = line.replace('*', "")
-        line = line.replace('\n', "")
-        line = line.replace('\u3000', "")
-        line = line.replace('俺', "私")
-        line = line.replace('僕', "私")
-        line = line.replace(' ', "")
-        deq_list = line in text_list
-        if line != "None" and line != "" and deq_list == False:
-            # with open('../data/get_timeline_list.txt', 'a',encoding='utf-8') as f:
-                # print(line, file=f)
-            text_list.append(line)
-
-    return text_list
-
+    choice_note = random.choice(hash)
+    choice_id = str(choice_note["id"]) 
+    choice_text = str(choice_note["text"])
+    misskey.notes_reactions_create(choice_id,"❤️")
+    return(choice_text)
 
 # print(get_tl_misskey())

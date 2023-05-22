@@ -1,5 +1,13 @@
+# 1つ上のディレクトリの絶対パスを取得し、sys.pathに登録する
+import sys
+from os.path import dirname
+parent_dir = dirname(dirname(__file__))
+if parent_dir not in sys.path:
+    sys.path.append(parent_dir) 
+
 import re
 from collections import deque
+from ngword_filter import judgement_sentence
 import random
 from misskey import Misskey
 import json
@@ -44,7 +52,10 @@ def get_tl_misskey():
     line = line.replace('俺', "私")
     line = line.replace('僕', "私")
     line = line.replace(' ', "")
-    misskey.notes_reactions_create(choice_id,"❤️")
-    return(line)
-
+    if judgement_sentence(line) != True and line != "None" and line != "":
+        misskey.notes_reactions_create(choice_id,"❤️")
+        return(line)
+    else:
+        return "None"
+    
 print(get_tl_misskey())

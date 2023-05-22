@@ -1,3 +1,10 @@
+# 1つ上のディレクトリの絶対パスを取得し、sys.pathに登録する
+import sys
+from os.path import dirname
+parent_dir = dirname(dirname(__file__))
+if parent_dir not in sys.path:
+    sys.path.append(parent_dir) 
+
 from ngword_filter import judgement_sentence
 import numpy as np
 from misskey import Misskey

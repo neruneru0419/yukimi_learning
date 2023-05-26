@@ -15,7 +15,7 @@ class Config(object):
 @sched.scheduled_job('cron', id='note', minute='*/10')
 def cron_note():
     text = get_tl_misskey()
-    while text == 'None' or text == None or text == '':
+    while text == "None" or text == '':
         text = get_tl_misskey()
     post_word = change_yukimi(text)
     note(post_word)

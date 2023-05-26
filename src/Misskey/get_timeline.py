@@ -52,10 +52,14 @@ def get_tl_misskey():
     line = line.replace('俺', "私")
     line = line.replace('僕', "私")
     line = line.replace(' ', "")
+    mfm_judge = list(line)
+    for one_letter in mfm_judge:
+        if(one_letter == '$'):
+            return "None"
     if judgement_sentence(line) != True and line != "None" and line != "":
         misskey.notes_reactions_create(choice_id,"❤️")
         return(line)
     else:
         return "None"
     
-print(get_tl_misskey())
+# print(get_tl_misskey())

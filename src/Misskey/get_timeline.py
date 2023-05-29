@@ -21,12 +21,11 @@ misskey = Misskey(config['token']['server'], i= config['token']['i'])
 
 #Misskey API json request用
 get_tl_url = "https://" + config['token']['server'] + "/api/notes/timeline"
-limit = 15
+limit = 100
 get_tl_json_data = {
     "i" : config["token"]["i"],
     "limit": limit,
 }
-
 
 
 # ToDo:この部分をmfm-jsでデコードするようにする
@@ -56,10 +55,16 @@ def get_tl_misskey():
     for one_letter in mfm_judge:
         if(one_letter == '$'):
             return "None"
-    if judgement_sentence(line) != True and line != "None" and line != "":
-        misskey.notes_reactions_create(choice_id,"❤️")
-        return(line)
-    else:
-        return "None"
+    try:
+        if choice_note['reactions']['❤'] == 1:
+            return "None"
+    except KeyError:
+        if choice_note["user"]["username"] == "YukimiLearning" or choice_note['cw'] != None:
+            return "None"
+        elif judgement_sentence(line) != True and line != "None" and line != "":
+            misskey.notes_reactions_create(choice_id,"❤️")
+            return(line)
+        else:
+            return "None"
     
 # print(get_tl_misskey())

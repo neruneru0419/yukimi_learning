@@ -38,6 +38,12 @@ def get_tl_misskey():
     choice_note = random.choice(hash)
     choice_id = str(choice_note["id"]) 
     choice_text = str(choice_note["text"])
+    ###
+    #URLその他もろもろ除外
+    # Todo 
+    #とりあえずいらんもの除外しまくったので後で整理
+    #
+    ###
     line = re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", choice_text)
     line = re.sub(r'@.*', "", line)
     line = re.sub(r'#.*', "", line)
@@ -59,8 +65,13 @@ def get_tl_misskey():
         if choice_note['reactions']['❤'] == 1:
             return "None"
     except KeyError:
+        #自分自身の投稿を除外
         if choice_note["user"]["username"] == "YukimiLearning" or choice_note['cw'] != None:
             return "None"
+        #フォロワー限定投稿を除外
+        elif choice_note["visibility"] == "followers":
+            return "None"
+        #センシティブワード検知
         elif judgement_sentence(line) != True and line != "None" and line != "":
             misskey.notes_reactions_create(choice_id,"❤️")
             return(line)
